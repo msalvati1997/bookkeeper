@@ -157,6 +157,7 @@ public class LedgerMetadataTest2 {
 		@Test(expected = IllegalArgumentException.class)
 		public void testSetEnsembleSize() {
 		    TreeMap<Long, List<BookieId>> ensembles = new TreeMap<>();
+		    
 			ensemble= new ArrayList<>();
 			int ensembleSize=2;
 			for(int i=0;i<ensembleSize;i++) {
@@ -182,13 +183,15 @@ public class LedgerMetadataTest2 {
 			for(int i=0;i<ensembleSize;i++) {
 				ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
 			}
+	         List<BookieId> EmptyList = Collections.<BookieId>emptyList();  
+
 			ensembles.put(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE), ensemble);
 			org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
 		            .withWriteQuorumSize(0)
 		            .withAckQuorumSize(0)
 		            .withId(0)
 		            .withEnsembleSize(0)
-		            .newEnsembleEntry(0, Collections.emptyList())
+		            .newEnsembleEntry(0, EmptyList)
 		            .withEnsembleSize(0)
 		            .build();
 		}
