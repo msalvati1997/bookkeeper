@@ -3,6 +3,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,11 +17,21 @@ import org.apache.bookkeeper.net.BookieId;
 import org.apache.bookkeeper.net.BookieSocketAddress;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.junit.experimental.runners.Enclosed;
 
-@RunWith(Parameterized.class)
+/**
+ * Unit test for {@link LedgerMetadataBuilder}.
+ * 
+ * @author Martina Salvati
+ */
+
+
+@RunWith(Enclosed.class)
 public class LedgerMetadataTest  {
-	private static List<BookieId> ensemble;
-
+	
+	@RunWith(Parameterized.class)
+	public static class TestMetadataBuilderCreate {
+	    private static List<BookieId> ensemble;
 		private final  Object digestType;
 	    private final byte[] passwd ;
 	    private final long ledgerId;
@@ -36,7 +47,7 @@ public class LedgerMetadataTest  {
 	    private final boolean storeCtime;
 	    private final long lenght;
 
-public LedgerMetadataTest(Object digestType,  byte[] passwd, long ledgerId,
+     public TestMetadataBuilderCreate(Object digestType,  byte[] passwd, long ledgerId,
 			int ensembleSize, int writequorumSize, int ackQuorumSize, int version, long ctime, long ctoken,
 			Map<String, byte[]> customMetadata, long lastEntryId, long firstEntryId, boolean storeCtime, long lenght) {
 		super();
@@ -343,5 +354,174 @@ org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder
  }
  }
 	    	
-    }
+    } 
+	 public static class TestMetadataBuilderException  {
+		  private static List<BookieId> ensemble;
+		    private static long ctime = ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
+		    private static long ctoken = 123456L;
+		    private final Map<String, byte[]> customMetadata=Collections.emptyMap();
+		    boolean storeCtime=true;   
+		   
+
+			   //Ledger id must be set
+				@Test(expected = IllegalArgumentException.class)
+				public void  withtouId() {
+					org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
+								.withEnsembleSize(ensemble.size()).withWriteQuorumSize(2).withAckQuorumSize(1)
+						        .newEnsembleEntry(-1, ensemble)
+						        .withMetadataFormatVersion(org.apache.bookkeeper.meta.LedgerMetadataSerDe.METADATA_FORMAT_VERSION_1)
+						        .withClosedState()
+						        .withCreationTime(ctime)
+						        .withCToken(ctoken)
+						        .withInRecoveryState()
+						        .withCustomMetadata(customMetadata)
+						        .storingCreationTime(storeCtime)
+								.build();
+				}
+				@Test(expected = IllegalArgumentException.class)
+				//There must be at least one ensemble in the ledger
+				public void  withtouEnsembleSize() {
+					org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()		
+						        .withMetadataFormatVersion(org.apache.bookkeeper.meta.LedgerMetadataSerDe.METADATA_FORMAT_VERSION_1)
+						        .withClosedState()
+					            .withId(100L)
+						        .withCreationTime(ctime)
+						        .withCToken(ctoken)
+						        .withInRecoveryState()
+						        .withCustomMetadata(customMetadata)
+						        .storingCreationTime(storeCtime )
+								.build();
+				}
+				//Write quorum must be less or equal to ensemble size
+				@Test (expected = IllegalArgumentException.class)
+				public void  illegalEnsamble1() {
+					org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
+				            .withEnsembleSize(0)
+				            .withWriteQuorumSize(1)
+				            .withAckQuorumSize(3)
+				            .withId(100L)
+				            .newEnsembleEntry(-1,  new ArrayList<>())
+				            .withMetadataFormatVersion(org.apache.bookkeeper.meta.LedgerMetadataSerDe.METADATA_FORMAT_VERSION_1)
+				            .withClosedState()
+				            .withCreationTime(ctime)
+				            .withCToken(ctoken)
+				            .withInRecoveryState()
+				            .withCustomMetadata(customMetadata)
+				            .storingCreationTime(storeCtime )
+				            .build();
+				}
+				//Size of passed in ensemble must match the ensembleSize of the builder
+				@Test (expected = IllegalArgumentException.class)
+				public void  illegalEnsamble2() {
+					ensemble= new ArrayList<BookieId>();
+					for(int i=0;i<5;i++) {
+						ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
+					}
+					org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
+				            .withEnsembleSize(ensemble.size())
+				            .withWriteQuorumSize(1)
+				            .withAckQuorumSize(3)
+				            .withId(100L)
+				            .newEnsembleEntry(-1,  new ArrayList<>())
+				            .withMetadataFormatVersion(org.apache.bookkeeper.meta.LedgerMetadataSerDe.METADATA_FORMAT_VERSION_1)
+				            .withClosedState()
+				            .withCreationTime(ctime)
+				            .withCToken(ctoken)
+				            .withInRecoveryState()
+				            .withCustomMetadata(customMetadata)
+				            .storingCreationTime(storeCtime )
+				            .build();
+					 assertTrue("Size of passed in ensemble must match the ensembleSize of the builder",
+							 metadata.toString().contains(Base64.getEncoder().encodeToString(String.valueOf(ensemble.size()).getBytes())));
+				}
+				//Write quorum must be greater or equal to ack quorum
+				@Test(expected = IllegalArgumentException.class)
+				public void  illegalAckQuorum() {
+					ensemble= new ArrayList<BookieId>();
+					int ensembleSize=2;
+					for(int i=0;i<ensembleSize;i++) {
+						ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
+					}
+					org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
+				            .withEnsembleSize(ensemble.size()).withWriteQuorumSize(0).withAckQuorumSize(1)
+				            .newEnsembleEntry(0, ensemble)
+				            .withId(100L)
+				            .withMetadataFormatVersion(org.apache.bookkeeper.meta.LedgerMetadataSerDe.METADATA_FORMAT_VERSION_1)
+				            .withClosedState()
+				            .withCreationTime(ctime)
+				            .withCToken(ctoken)
+				            .withInRecoveryState()
+				            .withCustomMetadata(customMetadata)
+				            .storingCreationTime(storeCtime )
+				            .build();
+				}
+				
+				//Size of passed in ensemble must match the ensembleSize of the builder
+				@Test(expected = IllegalArgumentException.class)
+				public void passedEnsembleIllegal() {
+					ensemble= new ArrayList<BookieId>();
+					int ensembleSize=2;
+					for(int i=0;i<ensembleSize;i++) {
+						ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
+					}
+					List <BookieId> ensemble_passed = new ArrayList<BookieId>();
+					for(int i=0;i<30;i++) {
+						ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
+					}
+					org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
+				            .withEnsembleSize(ensemble.size()).withWriteQuorumSize(2).withAckQuorumSize(2)
+				            .newEnsembleEntry(0, ensemble)
+				            .withId(100L)
+				            .withMetadataFormatVersion(org.apache.bookkeeper.meta.LedgerMetadataSerDe.METADATA_FORMAT_VERSION_1)
+				            .withClosedState()
+				            .withCreationTime(ctime)
+				            .withCToken(ctoken)
+				            .replaceEnsembleEntry(0, ensemble_passed)
+				            .withInRecoveryState()
+				            .withCustomMetadata(customMetadata)
+				            .storingCreationTime(storeCtime )
+				            .build();
+				}
+				//New entry must have a first entry greater than any existing ensemble key
+				@Test(expected = IllegalArgumentException.class)
+				public void testSetEnsembleSize() {
+				 
+					ensemble= new ArrayList<BookieId>();
+					int ensembleSize=2;
+					for(int i=0;i<ensembleSize;i++) {
+						ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
+					}
+					org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
+				            .withWriteQuorumSize(0)
+				            .withAckQuorumSize(0)
+				            .withId(0)
+				            .withEnsembleSize(ensemble.size())
+				            .newEnsembleEntry(0, ensemble)
+				            .build();
+				   LedgerMetadataBuilder metadata2 = LedgerMetadataBuilder.from(metadata);
+				   metadata2.newEnsembleEntry(-1, ensemble);
+				}
+				//Can only set ensemble size before adding ensembles to the builder
+				@Test(expected = IllegalStateException.class)
+				public void testEnsembleSize() {
+					ensemble= new ArrayList<BookieId>();
+					int ensembleSize=2;
+					for(int i=0;i<ensembleSize;i++) {
+						ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
+					}
+					org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
+				            .withWriteQuorumSize(0)
+				            .withAckQuorumSize(0)
+				            .withId(0)
+				            .withEnsembleSize(0)
+				            .newEnsembleEntry(0, new ArrayList<BookieId>())
+				            .withEnsembleSize(0)
+				            .build();
+				}
+			   }
+			      
+				
+	 }
+
+
 
