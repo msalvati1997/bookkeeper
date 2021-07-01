@@ -135,7 +135,7 @@ public class LedgerMetadataTest2 {
 			for(int i=0;i<ensembleSize;i++) {
 				ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
 			}
-			ArrayList ensemble_passed = new ArrayList<>();
+			List <BookieId> ensemble_passed = new ArrayList<BookieId>();
 			for(int i=0;i<30;i++) {
 				ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
 			}
