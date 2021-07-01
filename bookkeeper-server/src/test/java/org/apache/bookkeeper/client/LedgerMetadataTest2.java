@@ -84,7 +84,7 @@ public class LedgerMetadataTest2 {
 		//Size of passed in ensemble must match the ensembleSize of the builder
 		@Test (expected = IllegalArgumentException.class)
 		public void  illegalEnsamble2() {
-			ensemble= new ArrayList<>();
+			ensemble= new ArrayList<BookieId>();
 			for(int i=0;i<5;i++) {
 				ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
 			}
@@ -108,7 +108,7 @@ public class LedgerMetadataTest2 {
 		//Write quorum must be greater or equal to ack quorum
 		@Test(expected = IllegalArgumentException.class)
 		public void  illegalAckQuorum() {
-			ensemble= new ArrayList<>();
+			ensemble= new ArrayList<BookieId>();
 			int ensembleSize=2;
 			for(int i=0;i<ensembleSize;i++) {
 				ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
@@ -130,7 +130,7 @@ public class LedgerMetadataTest2 {
 		//Size of passed in ensemble must match the ensembleSize of the builder
 		@Test(expected = IllegalArgumentException.class)
 		public void passedEnsembleIllegal() {
-			ensemble= new ArrayList<>();
+			ensemble= new ArrayList<BookieId>();
 			int ensembleSize=2;
 			for(int i=0;i<ensembleSize;i++) {
 				ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
@@ -156,14 +156,12 @@ public class LedgerMetadataTest2 {
 		//New entry must have a first entry greater than any existing ensemble key
 		@Test(expected = IllegalArgumentException.class)
 		public void testSetEnsembleSize() {
-		    TreeMap<Long, List<BookieId>> ensembles = new TreeMap<>();
-		    
-			ensemble= new ArrayList<>();
+		 
+			ensemble= new ArrayList<BookieId>();
 			int ensembleSize=2;
 			for(int i=0;i<ensembleSize;i++) {
 				ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
 			}
-			ensembles.put(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE), ensemble);
 			org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
 		            .withWriteQuorumSize(0)
 		            .withAckQuorumSize(0)
@@ -177,21 +175,17 @@ public class LedgerMetadataTest2 {
 		//Can only set ensemble size before adding ensembles to the builder
 		@Test(expected = IllegalStateException.class)
 		public void testEnsembleSize() {
-		    TreeMap<Long, List<BookieId>> ensembles = new TreeMap<>();
-			ensemble= new ArrayList<>();
+			ensemble= new ArrayList<BookieId>();
 			int ensembleSize=2;
 			for(int i=0;i<ensembleSize;i++) {
 				ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
 			}
-	         List<BookieId> EmptyList = Collections.<BookieId>emptyList();  
-
-			ensembles.put(ThreadLocalRandom.current().nextLong(Long.MAX_VALUE), ensemble);
 			org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
 		            .withWriteQuorumSize(0)
 		            .withAckQuorumSize(0)
 		            .withId(0)
 		            .withEnsembleSize(0)
-		            .newEnsembleEntry(0, EmptyList)
+		            .newEnsembleEntry(0, new ArrayList<BookieId>())
 		            .withEnsembleSize(0)
 		            .build();
 		}
