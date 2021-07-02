@@ -53,6 +53,7 @@
   <modules>
     <module>buildtools</module>
     <module>circe-checksum</module>
+	<module>jacoco-reports</module>
     <module>bookkeeper-common</module>
     <module>bookkeeper-common-allocator</module>
     <module>stats</module>
@@ -70,7 +71,7 @@
     <module>bookkeeper-dist</module>
     <module>shaded</module>
     <module>microbenchmarks</module>
-    <module>tests</module>
+
   </modules>
   <mailingLists>
     <mailingList>
