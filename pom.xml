@@ -899,9 +899,11 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${maven-surefire-plugin.version}</version>
         <configuration>
+		  <argLine>-Xmx2G -Djava.net.preferIPv4Stack=true -Dio.netty.leakDetection.level=paranoid</argLine>
           <redirectTestOutputToFile>${redirectTestOutputToFile}</redirectTestOutputToFile>
           <forkCount>${forkCount.variable}</forkCount>
           <reuseForks>false</reuseForks>
+		  <trimStackTrace>false</trimStackTrace>
           <forkedProcessTimeoutInSeconds>1800</forkedProcessTimeoutInSeconds>
           <rerunFailingTestsCount>${testRetryCount}</rerunFailingTestsCount>
         </configuration>
@@ -911,11 +913,9 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>${maven-javadoc-plugin.version}</version>
         <configuration>
+		  <additionalparam>-notimestamp</additionalparam>
           <!-- Prevent missing javadoc comments from being marked as errors -->
-          <additionalparam>-Xdoclint:none -notimestamp</additionalparam>
-          <additionalOptions>
-            <additionalOption>-Xdoclint:none -notimestamp</additionalOption>
-          </additionalOptions>
+		   <doclint>none</doclint>
           <subpackages>org.apache.bookkeeper.client:org.apache.bookkeeper.client.api:org.apache.bookkeeper.common.annotation:org.apache.bookkeeper.conf:org.apache.bookkeeper.feature:org.apache.bookkeeper.stats</subpackages>
           <groups>
             <group>
@@ -1007,6 +1007,7 @@
 
             <!-- Website -->
             <exclude>site/**</exclude>
+			<exclude>site2/**</exclude>
 
             <!-- Thrift generated files -->
             <exclude>**/org/apache/distributedlog/thrift/*</exclude>
