@@ -199,15 +199,7 @@
     <spotbugs-maven-plugin.version>3.1.8</spotbugs-maven-plugin.version>
     <forkCount.variable>1</forkCount.variable>
     <servlet-api.version>4.0.0</servlet-api.version>
-    <sonar.projectKey>msalvati97:${project.groupId}:${project.artifactId}</sonar.projectKey>
-    <sonar.organization>msalvati97</sonar.organization>
-    <sonar.host.url>https://sonarcloud.io</sonar.host.url>  
-    <sonar.links.homepage>https://github.com/msalvati97/bookkeeper</sonar.links.homepage>
-    <sonar.links.ci>https://travis-ci.com/msalvati97/bookkeeper</sonar.links.ci>
-    <sonar.links.scm>https://github.com/msalvati97/bookkeeper</sonar.links.scm>
-    <sonar.links.issue>https://github.com/msalvati97/bookkeeper/issues</sonar.links.issue>
-    <aggregate.report.dir>tests/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>	
-	<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <aggregate.report.dir>jacoco-reports/target/site/jacoco-aggregate/jacoco.xml</aggregate.report.dir>
   </properties>
 
   <!-- dependency definitions -->
@@ -826,26 +818,6 @@
           <groupId>org.sonarsource.scanner.maven</groupId>
           <artifactId>sonar-maven-plugin</artifactId>
           <version>3.6.0.1398</version>
-     </plugin>
-        	<plugin>
-        <groupId>org.jacoco</groupId>
-        <artifactId>jacoco-maven-plugin</artifactId>
-        <version>${jacoco-maven-plugin.version}</version>
-        <executions>
-          <execution>
-            <id>prepare-agent</id>
-            <goals>
-             <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-          <execution>
-            <id>report</id>
-            <goals>
-             <goal>report</goal>
-            </goals>
-          </execution>
-        </executions>
-        </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-checkstyle-plugin</artifactId>
@@ -902,6 +874,25 @@
 	      </compilerArgs>
         </configuration>
       </plugin>
+	  <plugin>
+        <groupId>org.jacoco</groupId>
+        <artifactId>jacoco-maven-plugin</artifactId>
+        <version>${jacoco-maven-plugin.version}</version>
+        <executions>
+          <execution>
+            <id>prepare-agent</id>
+            <goals>
+             <goal>prepare-agent</goal>
+            </goals>
+          </execution>
+          <execution>
+            <id>report</id>
+            <goals>
+             <goal>report</goal>
+            </goals>
+          </execution>
+        </executions>
+        </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
