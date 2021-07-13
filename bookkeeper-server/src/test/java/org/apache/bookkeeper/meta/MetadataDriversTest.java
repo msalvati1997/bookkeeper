@@ -12,33 +12,21 @@ import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.MockitoRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import static org.mockito.ArgumentMatchers.eq;
-import org.mockito.Spy;
-import org.mockito.internal.matchers.Any;
-import static org.mockito.Mockito.CALLS_REAL_METHODS;
-import org.mockito.runners.MockitoJUnitRunner;
-import org.mockito.stubbing.OngoingStubbing;
-import org.powermock.api.mockito.PowerMockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static org.mockito.ArgumentMatchers.eq;
-import com.google.common.collect.Maps;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import org.apache.bookkeeper.conf.ClientConfiguration;
 import org.apache.bookkeeper.conf.ServerConfiguration;
-import org.apache.bookkeeper.discover.RegistrationClient;
-import org.apache.bookkeeper.discover.RegistrationManager;
 import org.apache.bookkeeper.discover.RegistrationManager.RegistrationListener;
 import org.apache.bookkeeper.meta.MetadataDriverTestConfiguration.BookieDriver1;
 import org.apache.bookkeeper.meta.MetadataDriverTestConfiguration.BookieDriver2;
@@ -54,18 +42,11 @@ import org.apache.bookkeeper.zookeeper.ZooKeeperClient;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.zookeeper.KeeperException;
-import org.hamcrest.Matcher;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.mockito.Mock;
 
 /**
  * Unit test of {@link MetadataDrivers}.
@@ -75,6 +56,8 @@ import org.mockito.Mock;
 @RunWith(Enclosed.class)
 public class MetadataDriversTest {
     static final Logger log = LoggerFactory.getLogger(MetadataDriversTest.class);
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
 
     @RunWith(Parameterized.class) 
 	public static class getClientAndBookieDriverFromSchemeTest {
@@ -166,8 +149,8 @@ public class MetadataDriversTest {
     
    	public static class testRegisterClientAndBookieDriver {
     	
-		static MetadataClientDriver clientDriver= mock(MetadataClientDriver.class);
-		static MetadataBookieDriver bookieDriver= mock(MetadataBookieDriver.class);
+		 static MetadataClientDriver clientDriver= mock(MetadataClientDriver.class);
+		 static MetadataBookieDriver bookieDriver= mock(MetadataBookieDriver.class);
 
    	    @BeforeClass
    		public static void settingMock() {
@@ -229,9 +212,7 @@ public class MetadataDriversTest {
 		        String saveDriversStr = System.getProperty(BK_METADATA_BOOKIE_DRIVERS_PROPERTY);
 		        try {
 		            System.setProperty(BK_METADATA_BOOKIE_DRIVERS_PROPERTY, StringUtils.join(new String[] { BookieDriver1.class.getName(), BookieDriver2.class.getName() }, ':'));
-
 		            MetadataDrivers.loadInitialDrivers();
-
 		            MetadataBookieDriver loadedDriver1 = MetadataDrivers.getBookieDriver("driver1");
 		            assertEquals(BookieDriver1.class, loadedDriver1.getClass());
 		            MetadataBookieDriver loadedDriver2 = MetadataDrivers.getBookieDriver("driver2");
