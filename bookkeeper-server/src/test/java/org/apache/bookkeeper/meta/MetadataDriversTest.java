@@ -13,6 +13,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import lombok.Cleanup;
 import org.apache.bookkeeper.discover.RegistrationClient;
 import org.apache.bookkeeper.meta.zk.ZKMetadataBookieDriver;
+import org.apache.zookeeper.KeeperException;
 import org.junit.*;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
@@ -22,6 +23,8 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 import java.net.URI;
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
@@ -368,6 +371,28 @@ public class MetadataDriversTest {
 			}
 		}
 
+		//improvements of tests
+		@Test(expected =java.util.concurrent.ExecutionException.class)
+		public void testExceptionUriLedgerManagerFactory() throws Exception {
+			when(clientDriver.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(clientDriver);
+			when(ZKcl.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(ZKcl);
+			when(bookieDriver.getScheme()).thenReturn("zk+hierarchical://127.0.0.1/ledgers");
+			when(clientConf.getMetadataServiceUri()).thenReturn("zk+hierarchical://127.0.0.1/ledgers");
+			when(mockZkBuilder.connectString(eq("127.0.0.1"))).thenReturn(mockZkBuilder);
+			when(mockZkBuilder.sessionTimeoutMs(anyInt())).thenReturn(mockZkBuilder);
+			when(mockZkBuilder.requestRateLimit(anyDouble())).thenReturn(mockZkBuilder);
+			when(mockZkBuilder.statsLogger(any(StatsLogger.class))).thenReturn(mockZkBuilder);
+			when(mockZkBuilder.operationRetryPolicy(any(RetryPolicy.class))).thenReturn(mockZkBuilder);
+			when(mockZkc.exists(anyString(), eq(false))).thenReturn(null);
+			when(mockZkBuilder.build()).thenReturn(mockZkc);
+			when(serverConf.getMetadataServiceUri()).thenReturn("zk+hierarchical://127.0.0.1/ledgers");
+			mockStatic(ZooKeeperClient.class);
+			PowerMockito.when(ZooKeeperClient.class, "newBuilder").thenReturn(mockZkBuilder);
+			MetadataDrivers.runFunctionWithLedgerManagerFactory(serverConf, ledgerManagerFactory -> {
+				return (Void) null;
+			});
+		}
+
 		private void myfunctiontest1(RegistrationClient registrationClient, int i) {
 		}
 
@@ -408,5 +433,6 @@ public class MetadataDriversTest {
 				return 0;
 			});
 		}
+
 	}
 }
