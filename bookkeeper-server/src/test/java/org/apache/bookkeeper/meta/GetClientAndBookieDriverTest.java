@@ -39,12 +39,12 @@ public class GetClientAndBookieDriverTest {
 		public static Collection data() {
 			return java.util.Arrays.asList(new Object[][]{
 					{"zk", null},
-					{((String) null), NullPointerException.class},
-					{((URI) null), NullPointerException.class},
-					{"unknown", IllegalArgumentException.class},
 					{"Zk", null},
 					{"zK", null},
-					{"ZK", null}
+					{"ZK", null},
+					{((String) null), NullPointerException.class}, //adequacy
+					{((URI) null), NullPointerException.class},  //adequacy
+					{"unknown", IllegalArgumentException.class}, //adequacy
 			});
 		}
 
