@@ -355,8 +355,9 @@ org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder
  }
 	    	
     } 
+
 	 public static class TestMetadataBuilderException  {
-		  private static List<BookieId> ensemble;
+		    private static List<BookieId> ensemble;
 		    private static long ctime = ThreadLocalRandom.current().nextLong(Long.MAX_VALUE);
 		    private static long ctoken = 123456L;
 		    private final Map<String, byte[]> customMetadata=Collections.emptyMap();
@@ -518,10 +519,52 @@ org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder
 				            .withEnsembleSize(0)
 				            .build();
 				}
+
+		 //New entry must have a first entry greater than any existing ensemble key 2
+		 @Test(expected = IllegalArgumentException.class)
+		 public void testSetEnsembleSize2() {
+
+			 ensemble= new ArrayList<BookieId>();
+			 int ensembleSize=2;
+			 for(int i=0;i<ensembleSize;i++) {
+				 ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
+			 }
+			 org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
+					 .withWriteQuorumSize(0)
+					 .withAckQuorumSize(0)
+					 .withId(0)
+					 .withEnsembleSize(0)
+					 .newEnsembleEntry(0, ensemble)
+					 .withEnsembleSize(0)
+					 .build();
+			 LedgerMetadataBuilder metadata2 = LedgerMetadataBuilder.from(metadata);
+			 metadata2.newEnsembleEntry(-1, ensemble);
+		 }
+
+		 //New entry must have a first entry greater than any existing ensemble key 2
+		 @Test(expected = IllegalArgumentException.class)
+		 public void testSetEnsembleSize3() {
+
+			 ensemble= new ArrayList<BookieId>();
+			 int ensembleSize=2;
+			 for(int i=0;i<ensembleSize;i++) {
+				 ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
+			 }
+			 org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.create()
+					 .withWriteQuorumSize(0)
+					 .withAckQuorumSize(0)
+					 .withId(0)
+					 .withEnsembleSize(2)
+					 .newEnsembleEntry(1 ,ensemble)
+					 .build();
+			 LedgerMetadataBuilder metadata2 = LedgerMetadataBuilder.from(metadata);
+			 metadata2.newEnsembleEntry(0, ensemble);
+		 }
+	 }
 			   }
 			      
 				
-	 }
+
 
 
 
