@@ -18,6 +18,7 @@ import static org.mockito.Mockito.when;
  * Martina Salvati
  */
 @RunWith(Parameterized.class)
+
 public class RegisterClientAndBookieDriverTest {
 
     static MetadataClientDriver clientDriver = mock(MetadataClientDriver.class);
@@ -35,15 +36,15 @@ public class RegisterClientAndBookieDriverTest {
     public void configureMock() {
         when(clientDriver.getScheme()).thenReturn(metadataBackendScheme);
         when(bookieDriver.getScheme()).thenReturn(metadataBackendScheme);
-
     }
     @Parameterized.Parameters
     public static Collection data() {
         return java.util.Arrays.asList(new Object[][]{
-                {"zk1",IllegalArgumentException.class,false},
                 {"zk",null,false},
-                {"ZK1", IllegalArgumentException.class,false},
-                {"zk+hierarchical://127.0.0.1/ledgers",IllegalArgumentException.class,false},
+                {"zk1",IllegalArgumentException.class,false}, //adequacy
+                {"zk1",null,false}, //adequacy
+                {"ZK1", IllegalArgumentException.class,false}, //adequacy
+                {"zk+hierarchical://127.0.0.1/ledgers",IllegalArgumentException.class,false}, //adequacy
                 {"zk",null,true}, //adequacy
                 {"ZK1", IllegalArgumentException.class,true}, //adequacy
                 {"zk+hierarchical://127.0.0.1/ledgers",IllegalArgumentException.class,true}, //adequacy
@@ -53,24 +54,21 @@ public class RegisterClientAndBookieDriverTest {
     }
     @Test
     public void testRegisterClientDriver() {
-        System.out.println(metadataBackendScheme+allowOverride);
         boolean registered=true;
         try {
-            MetadataDrivers.getClientDriver(metadataBackendScheme);
+            MetadataDrivers.getClientDriver(clientDriver.getScheme());
         } catch (Exception e) {
-            Assert.assertEquals(e.getClass(), res); //it should fail if the driver is not registered
+            Assert.assertEquals(e.getClass(), res);
             registered=false;
         }
         if(!allowOverride) {
             MetadataDrivers.registerClientDriver(clientDriver.getScheme(), clientDriver.getClass());
             MetadataClientDriver driver = MetadataDrivers.getClientDriver(clientDriver.getScheme());
-            System.out.println(MetadataDrivers.getClientDrivers());
             if (!registered) {
                 assertEquals(clientDriver.getClass(), driver.getClass());
             }
             assertTrue(!getClientDrivers().isEmpty());
             MetadataDrivers.registerClientDriver(clientDriver.getScheme(), clientDriver.getClass(),false);
-            System.out.println(MetadataDrivers.getClientDrivers());
             if (!registered) {
                 assertEquals(clientDriver.getClass(), driver.getClass());
             }
@@ -78,13 +76,12 @@ public class RegisterClientAndBookieDriverTest {
         else {
             MetadataDrivers.registerClientDriver(clientDriver.getScheme(), clientDriver.getClass(),true);
             MetadataClientDriver driver = MetadataDrivers.getClientDriver(clientDriver.getScheme());
-            System.out.println(MetadataDrivers.getClientDrivers());
             if (!registered) {
                 assertEquals(clientDriver.getClass(), driver.getClass());
             }
         }
         assertTrue(!getClientDrivers().isEmpty());
-    }
+        }
     @Test
     public void testRegisterBookieDriver() {
         boolean registered=true;

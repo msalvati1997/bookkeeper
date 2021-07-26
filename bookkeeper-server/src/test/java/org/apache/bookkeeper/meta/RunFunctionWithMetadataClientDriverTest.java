@@ -43,88 +43,89 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 @RunWith(Enclosed.class)
 public  class RunFunctionWithMetadataClientDriverTest<T> {
 
-@RunWith(PowerMockRunner.class)
-@PowerMockRunnerDelegate(Parameterized.class)
-@PrepareForTest({ZooKeeperClient.class})
-public static class RunFunctionWithMetadataClientDriverTestBase<T> {
+    @RunWith(PowerMockRunner.class)
+    @PowerMockRunnerDelegate(Parameterized.class)
+    @PrepareForTest({ZooKeeperClient.class})
+    public static class RunFunctionWithMetadataClientDriverTestBase<T> {
 
-    static MetadataClientDriver clientDriver = mock(MetadataClientDriver.class);
-    static MetadataBookieDriver bookieDriver = mock(MetadataBookieDriver.class);
-    static ClientConfiguration clientConf = mock(ClientConfiguration.class);
-    static ServerConfiguration serverConf = mock(ServerConfiguration.class);
-    static ScheduledExecutorService exec = mock(ScheduledExecutorService.class);
-    static ZKMetadataClientDriver ZKcl = mock(ZKMetadataClientDriver.class);
-    static ZooKeeperClient.Builder mockZkBuilder = mock(ZooKeeperClient.Builder.class);
-    static ZooKeeperClient mockZkc = mock(ZooKeeperClient.class);
-    private final String metadataBackendScheme;
-    private final ScheduledExecutorService executor;
-    private final Function<MetadataClientDriver, T> function;
-    private final Object res;
-    private static Function<MetadataClientDriver, Void> myvalidfunction = clientDriver -> {
-        return (Void) null;
-    };
+        static MetadataClientDriver clientDriver = mock(MetadataClientDriver.class);
+        static MetadataBookieDriver bookieDriver = mock(MetadataBookieDriver.class);
+        static ClientConfiguration clientConf = mock(ClientConfiguration.class);
+        static ServerConfiguration serverConf = mock(ServerConfiguration.class);
+        static ScheduledExecutorService exec = mock(ScheduledExecutorService.class);
+        static ZKMetadataClientDriver ZKcl = mock(ZKMetadataClientDriver.class);
+        static ZooKeeperClient.Builder mockZkBuilder = mock(ZooKeeperClient.Builder.class);
+        static ZooKeeperClient mockZkc = mock(ZooKeeperClient.class);
+        private final String metadataBackendScheme;
+        private final ScheduledExecutorService executor;
+        private final Function<MetadataClientDriver, T> function;
+        private final Object res;
+        private static Function<MetadataClientDriver, Void> myvalidfunction = clientDriver -> {
+            return (Void) null;
+        };
 
-    private static <T extends Throwable> void myFunc(Class<MetadataException> exceptionType) throws MetadataException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, Throwable, T {
-        final String message = "mymetadata";
-        throw exceptionType.getConstructor(String.class).newInstance(message);
-    }
+        private static <T extends Throwable> void myFunc(Class<MetadataException> exceptionType) throws MetadataException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException, Throwable, T {
+            final String message = "mymetadata";
+            throw exceptionType.getConstructor(String.class).newInstance(message);
+        }
 
-    public RunFunctionWithMetadataClientDriverTestBase(String metadataBackendScheme, ScheduledExecutorService executor, Function<MetadataClientDriver, T> function, Object res) {
-        this.metadataBackendScheme = metadataBackendScheme;
-        this.executor = executor;
-        this.function = function;
-        this.res = res;
-    }
+        public RunFunctionWithMetadataClientDriverTestBase(String metadataBackendScheme, ScheduledExecutorService executor, Function<MetadataClientDriver, T> function, Object res) {
+            this.metadataBackendScheme = metadataBackendScheme;
+            this.executor = executor;
+            this.function = function;
+            this.res = res;
+        }
 
-    @Before
-    public void configure() throws MetadataException, ConfigurationException, InterruptedException, KeeperException, IOException, ExecutionException {
-        when(clientDriver.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(clientDriver);
-        when(ZKcl.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(ZKcl);
-        when(bookieDriver.getScheme()).thenReturn(metadataBackendScheme);
-        when(mockZkBuilder.connectString(eq("127.0.0.1"))).thenReturn(mockZkBuilder);
-        when(mockZkBuilder.sessionTimeoutMs(anyInt())).thenReturn(mockZkBuilder);
-        when(mockZkBuilder.requestRateLimit(anyDouble())).thenReturn(mockZkBuilder);
-        when(mockZkBuilder.statsLogger(any(StatsLogger.class))).thenReturn(mockZkBuilder);
-        when(mockZkBuilder.operationRetryPolicy(any(RetryPolicy.class))).thenReturn(mockZkBuilder);
-        when(mockZkc.exists(anyString(), eq(false))).thenReturn(null);
-        when(mockZkBuilder.build()).thenReturn(mockZkc);
-        when(serverConf.getMetadataServiceUri()).thenReturn(metadataBackendScheme);
-        when(clientConf.getMetadataServiceUri()).thenReturn(metadataBackendScheme);
-        mockStatic(ZooKeeperClient.class);
-        try {
-            PowerMockito.when(ZooKeeperClient.class, "newBuilder").thenReturn(mockZkBuilder);
-        } catch (Exception e) {
-            e.printStackTrace();
+        @Before
+        public void configure() throws MetadataException, ConfigurationException, InterruptedException, KeeperException, IOException, ExecutionException {
+            when(clientDriver.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(clientDriver);
+            when(ZKcl.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(ZKcl);
+            when(bookieDriver.getScheme()).thenReturn(metadataBackendScheme);
+            when(mockZkBuilder.connectString(eq("127.0.0.1"))).thenReturn(mockZkBuilder);
+            when(mockZkBuilder.sessionTimeoutMs(anyInt())).thenReturn(mockZkBuilder);
+            when(mockZkBuilder.requestRateLimit(anyDouble())).thenReturn(mockZkBuilder);
+            when(mockZkBuilder.statsLogger(any(StatsLogger.class))).thenReturn(mockZkBuilder);
+            when(mockZkBuilder.operationRetryPolicy(any(RetryPolicy.class))).thenReturn(mockZkBuilder);
+            when(mockZkc.exists(anyString(), eq(false))).thenReturn(null);
+            when(mockZkBuilder.build()).thenReturn(mockZkc);
+            when(serverConf.getMetadataServiceUri()).thenReturn(metadataBackendScheme);
+            when(clientConf.getMetadataServiceUri()).thenReturn(metadataBackendScheme);
+            mockStatic(ZooKeeperClient.class);
+            try {
+                PowerMockito.when(ZooKeeperClient.class, "newBuilder").thenReturn(mockZkBuilder);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        @After
+        public void tearDown() throws Exception {
+            if (executor != null) {
+                executor.shutdown();
+            }
+        }
+
+        @Parameterized.Parameters
+        public static Collection data() {
+            return java.util.Arrays.asList(new Object[][]{
+                    {"zk+hierarchical://127.0.0.1/ledgers", null, myvalidfunction, null},
+                    {"zk+hierarchical://127.0.0.1/ledgers", Executors.newSingleThreadScheduledExecutor(), null, ExecutionException.class}, //adequacy
+                    {"zk+hierarchical://127.0.0.1/ledgers", Executors.newSingleThreadScheduledExecutor(), myvalidfunction, null}, //Adequacy
+                    {"zk+hierarchical://127.0.0.1/ledgers", null, null, ExecutionException.class}, //adequacy
+            });
+        }
+
+        @Test
+        public void testRunFunction() {
+            try {
+                MetadataDrivers.runFunctionWithMetadataClientDriver(clientConf, function, executor);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Assert.assertEquals(e.getClass(), res);
+            }
         }
     }
 
-    @After
-    public void tearDown() throws Exception {
-        if (executor != null) {
-            executor.shutdown();
-        }
-    }
-
-    @Parameterized.Parameters
-    public static Collection data() {
-        return java.util.Arrays.asList(new Object[][]{
-                {"zk+hierarchical://127.0.0.1/ledgers", Executors.newSingleThreadScheduledExecutor(), null, ExecutionException.class},
-                {"zk+hierarchical://127.0.0.1/ledgers", null, myvalidfunction, null},
-                {"zk+hierarchical://127.0.0.1/ledgers", Executors.newSingleThreadScheduledExecutor(), myvalidfunction, null},
-                {"zk+hierarchical://127.0.0.1/ledgers", null, null, ExecutionException.class}, //adequacy
-        });
-    }
-
-    @Test
-    public void testRunFunction() {
-        try {
-            MetadataDrivers.runFunctionWithMetadataClientDriver(clientConf, function, executor);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Assert.assertEquals(e.getClass(), res);
-        }
-    }
-}
     @RunWith(PowerMockRunner.class)
     @PrepareForTest({ZooKeeperClient.class})
     public static class RunFunctionConfigurationExceptionTestClient<T> {

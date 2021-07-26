@@ -70,6 +70,7 @@ public class GetClientAndBookieDriverTest {
 	@RunWith(Parameterized.class)
 	public static class getClientAndBookieDriverFromURI {
 
+
 		public getClientAndBookieDriverFromURI(String uri, Object res) {
 			super();
 			this.uri = uri;
@@ -83,14 +84,11 @@ public class GetClientAndBookieDriverTest {
 		public static Collection data() {
 			return java.util.Arrays.asList(new Object[][]{
 					{"zk+hierarchical://127.0.0.1/ledgers", null},
-					{"hierarchical://127.0.0.1/ledgers", IllegalArgumentException.class},
-					{("unknown://"), IllegalArgumentException.class},
-					{("//127.0.0.1/ledgers"), NullPointerException.class},
 					{(String) null, NullPointerException.class},
 					{(URI) null, NullPointerException.class},
-					{"bk://localhost:2181:3181/path/to/namespace", IllegalArgumentException.class},
-					{"bk://localhost:-2181/path/to/namespace", IllegalArgumentException.class},
-					{"zk+", NullPointerException.class},
+					{("//127.0.0.1/ledgers"), NullPointerException.class},
+				    {"hierarchical://127.0.0.1/ledgers", IllegalArgumentException.class},
+					{"", NullPointerException.class}, //adequacy
 			});
 		}
 
@@ -114,3 +112,4 @@ public class GetClientAndBookieDriverTest {
 
 	}
 }
+

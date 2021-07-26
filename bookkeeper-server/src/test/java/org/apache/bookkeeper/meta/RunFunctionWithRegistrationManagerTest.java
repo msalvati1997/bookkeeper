@@ -92,8 +92,8 @@ public  class RunFunctionWithRegistrationManagerTest<T> {
     @Parameterized.Parameters
     public static Collection data() {
         return java.util.Arrays.asList(new Object[][]{
-                {"zk+hierarchical://127.0.0.1/ledgers", null, ExecutionException.class},
                 {"zk+hierarchical://127.0.0.1/ledgers", myvalidfunction, null},
+                {"zk+hierarchical://127.0.0.1/ledgers", null, ExecutionException.class},//adequacy
                 {"zk+hierarchical://127.0.0.1/ledgers89", myvalidfunction, MetadataException.class}, //adequacy
                 {"zk+hierarchical://127.0.0.1/ledgers", null, ExecutionException.class}, //adequacy
         });
@@ -109,3 +109,4 @@ public  class RunFunctionWithRegistrationManagerTest<T> {
         }
     }
 }
+
