@@ -186,7 +186,8 @@ public class LedgerMetadataTest {
 
 		@Test
 		public void testFromLedgerMetadata() {
-			LedgerMetadataBuilder.from(other);
+			LedgerMetadataBuilder metadata = LedgerMetadataBuilder.from(other);
+			Assert.assertEquals(metadata.build().toString(),other.toString());
 		}
 	}
 
