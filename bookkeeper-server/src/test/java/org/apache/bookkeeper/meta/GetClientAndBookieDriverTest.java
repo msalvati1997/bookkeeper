@@ -42,9 +42,10 @@ public class GetClientAndBookieDriverTest {
 					{"Zk", null},
 					{"zK", null},
 					{"ZK", null},
-					{((String) null), NullPointerException.class}, //adequacy
-					{((URI) null), NullPointerException.class},  //adequacy
-					{"unknown", IllegalArgumentException.class}, //adequacy
+					//adequacy
+					{((String) null), NullPointerException.class},
+					{((URI) null), NullPointerException.class},
+					{"unknown", IllegalArgumentException.class},
 			});
 		}
 
@@ -84,11 +85,12 @@ public class GetClientAndBookieDriverTest {
 		public static Collection data() {
 			return java.util.Arrays.asList(new Object[][]{
 					{"zk+hierarchical://127.0.0.1/ledgers", null},
+					//adequacy
 					{(String) null, NullPointerException.class},
 					{(URI) null, NullPointerException.class},
 					{("//127.0.0.1/ledgers"), NullPointerException.class},
 				    {"hierarchical://127.0.0.1/ledgers", IllegalArgumentException.class},
-					{"", NullPointerException.class}, //adequacy
+					{"", NullPointerException.class},
 			});
 		}
 

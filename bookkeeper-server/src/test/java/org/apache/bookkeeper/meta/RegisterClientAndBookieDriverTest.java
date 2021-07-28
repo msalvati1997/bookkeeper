@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 /**
  * Unit test of @link MetadataDrivers
  * Method tested : registerClientDriver and registerBookieDriver
@@ -41,15 +42,16 @@ public class RegisterClientAndBookieDriverTest {
     public static Collection data() {
         return java.util.Arrays.asList(new Object[][]{
                 {"zk",null,false},
-                {"zk1",IllegalArgumentException.class,false}, //adequacy
-                {"zk1",null,false}, //adequacy
-                {"ZK1", IllegalArgumentException.class,false}, //adequacy
-                {"zk+hierarchical://127.0.0.1/ledgers",IllegalArgumentException.class,false}, //adequacy
-                {"zk",null,true}, //adequacy
-                {"ZK1", IllegalArgumentException.class,true}, //adequacy
-                {"zk+hierarchical://127.0.0.1/ledgers",IllegalArgumentException.class,true}, //adequacy
-                {"zk1",IllegalArgumentException.class,true},//adequacy
-                {"zk+hierarchical://127.0.0.1/ledgers",null,false}, //adequacy
+                //adequacy
+                {"zk1",IllegalArgumentException.class,false},
+                {"zk1",null,false},
+                {"ZK1", IllegalArgumentException.class,false},
+                {"zk+hierarchical://127.0.0.1/ledgers",IllegalArgumentException.class,false},
+                {"zk",null,true},
+                {"ZK1", IllegalArgumentException.class,true},
+                {"zk+hierarchical://127.0.0.1/ledgers",IllegalArgumentException.class,true},
+                {"zk1",IllegalArgumentException.class,true},
+                {"zk+hierarchical://127.0.0.1/ledgers",null,false},
         });
     }
     @Test

@@ -45,14 +45,15 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 public  class RunFunctionWithRegistrationManagerTest<T> {
 
-    static MetadataClientDriver clientDriver = mock(MetadataClientDriver.class);
-    static MetadataBookieDriver bookieDriver = mock(MetadataBookieDriver.class);
-    static ClientConfiguration clientConf = mock(ClientConfiguration.class);
-    static ServerConfiguration serverConf = mock(ServerConfiguration.class);
-    static ScheduledExecutorService exec = mock(ScheduledExecutorService.class);
-    static ZKMetadataClientDriver ZKcl = mock(ZKMetadataClientDriver.class);
-    static ZooKeeperClient.Builder mockZkBuilder = mock(ZooKeeperClient.Builder.class);
-    static ZooKeeperClient mockZkc = mock(ZooKeeperClient.class);
+    protected MetadataClientDriver clientDriver;
+    protected MetadataBookieDriver bookieDriver;
+    protected ClientConfiguration clientConf;
+    protected ServerConfiguration serverConf;
+    protected ScheduledExecutorService exec;
+    protected ZKMetadataClientDriver ZKcl;
+    protected ZooKeeperClient.Builder mockZkBuilder;
+    protected ZooKeeperClient mockZkc;
+
     private final String metadataBackendScheme;
     private final Function<RegistrationManager, T> function;
     private final Object res;
@@ -68,6 +69,15 @@ public  class RunFunctionWithRegistrationManagerTest<T> {
 
     @Before
     public void configure() throws MetadataException, ConfigurationException, InterruptedException, KeeperException, IOException, ExecutionException {
+
+        this.bookieDriver= mock(MetadataBookieDriver.class);
+        this.clientDriver = mock(MetadataClientDriver.class);
+        this.clientConf = mock(ClientConfiguration.class);
+        this.serverConf= mock(ServerConfiguration.class);
+        this.exec = mock(ScheduledExecutorService.class);
+        this.ZKcl=  mock(ZKMetadataClientDriver.class);
+        this.mockZkBuilder =  mock(ZooKeeperClient.Builder.class);
+        this.mockZkc = mock(ZooKeeperClient.class);
 
         when(clientDriver.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(clientDriver);
         when(ZKcl.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(ZKcl);
@@ -93,9 +103,10 @@ public  class RunFunctionWithRegistrationManagerTest<T> {
     public static Collection data() {
         return java.util.Arrays.asList(new Object[][]{
                 {"zk+hierarchical://127.0.0.1/ledgers", myvalidfunction, null},
-                {"zk+hierarchical://127.0.0.1/ledgers", null, ExecutionException.class},//adequacy
-                {"zk+hierarchical://127.0.0.1/ledgers89", myvalidfunction, MetadataException.class}, //adequacy
-                {"zk+hierarchical://127.0.0.1/ledgers", null, ExecutionException.class}, //adequacy
+                //adequacy
+                {"zk+hierarchical://127.0.0.1/ledgers", null, ExecutionException.class},
+                {"zk+hierarchical://127.0.0.1/ledgers89", myvalidfunction, MetadataException.class},
+                {"zk+hierarchical://127.0.0.1/ledgers", null, ExecutionException.class},
         });
     }
 

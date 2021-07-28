@@ -48,14 +48,15 @@ public  class RunFunctionWithMetadataClientDriverTest<T> {
     @PrepareForTest({ZooKeeperClient.class})
     public static class RunFunctionWithMetadataClientDriverTestBase<T> {
 
-        static MetadataClientDriver clientDriver = mock(MetadataClientDriver.class);
-        static MetadataBookieDriver bookieDriver = mock(MetadataBookieDriver.class);
-        static ClientConfiguration clientConf = mock(ClientConfiguration.class);
-        static ServerConfiguration serverConf = mock(ServerConfiguration.class);
-        static ScheduledExecutorService exec = mock(ScheduledExecutorService.class);
-        static ZKMetadataClientDriver ZKcl = mock(ZKMetadataClientDriver.class);
-        static ZooKeeperClient.Builder mockZkBuilder = mock(ZooKeeperClient.Builder.class);
-        static ZooKeeperClient mockZkc = mock(ZooKeeperClient.class);
+        protected MetadataClientDriver clientDriver;
+        protected MetadataBookieDriver bookieDriver;
+        protected ClientConfiguration clientConf;
+        protected ServerConfiguration serverConf;
+        protected ScheduledExecutorService exec;
+        protected ZKMetadataClientDriver ZKcl;
+        protected ZooKeeperClient.Builder mockZkBuilder;
+        protected ZooKeeperClient mockZkc;
+
         private final String metadataBackendScheme;
         private final ScheduledExecutorService executor;
         private final Function<MetadataClientDriver, T> function;
@@ -78,6 +79,17 @@ public  class RunFunctionWithMetadataClientDriverTest<T> {
 
         @Before
         public void configure() throws MetadataException, ConfigurationException, InterruptedException, KeeperException, IOException, ExecutionException {
+
+            this.bookieDriver= mock(MetadataBookieDriver.class);
+            this.clientDriver = mock(MetadataClientDriver.class);
+            this.clientConf = mock(ClientConfiguration.class);
+            this.serverConf= mock(ServerConfiguration.class);
+            this.exec = mock(ScheduledExecutorService.class);
+            this.ZKcl=  mock(ZKMetadataClientDriver.class);
+            this.mockZkBuilder =  mock(ZooKeeperClient.Builder.class);
+            this.mockZkc = mock(ZooKeeperClient.class);
+
+
             when(clientDriver.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(clientDriver);
             when(ZKcl.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(ZKcl);
             when(bookieDriver.getScheme()).thenReturn(metadataBackendScheme);
@@ -109,9 +121,10 @@ public  class RunFunctionWithMetadataClientDriverTest<T> {
         public static Collection data() {
             return java.util.Arrays.asList(new Object[][]{
                     {"zk+hierarchical://127.0.0.1/ledgers", null, myvalidfunction, null},
-                    {"zk+hierarchical://127.0.0.1/ledgers", Executors.newSingleThreadScheduledExecutor(), null, ExecutionException.class}, //adequacy
-                    {"zk+hierarchical://127.0.0.1/ledgers", Executors.newSingleThreadScheduledExecutor(), myvalidfunction, null}, //Adequacy
-                    {"zk+hierarchical://127.0.0.1/ledgers", null, null, ExecutionException.class}, //adequacy
+                    //adequacy
+                    {"zk+hierarchical://127.0.0.1/ledgers", Executors.newSingleThreadScheduledExecutor(), null, ExecutionException.class},
+                    {"zk+hierarchical://127.0.0.1/ledgers", Executors.newSingleThreadScheduledExecutor(), myvalidfunction, null},
+                    {"zk+hierarchical://127.0.0.1/ledgers", null, null, ExecutionException.class},
             });
         }
 
@@ -130,24 +143,34 @@ public  class RunFunctionWithMetadataClientDriverTest<T> {
     @PrepareForTest({ZooKeeperClient.class})
     public static class RunFunctionConfigurationExceptionTestClient<T> {
 
-        static MetadataClientDriver clientDriver = mock(MetadataClientDriver.class);
-        static MetadataBookieDriver bookieDriver = mock(MetadataBookieDriver.class);
-        static ClientConfiguration clientConf = mock(ClientConfiguration.class);
-        static ServerConfiguration serverConf = mock(ServerConfiguration.class);
-        static ScheduledExecutorService exec = mock(ScheduledExecutorService.class);
-        static ZKMetadataClientDriver ZKcl = mock(ZKMetadataClientDriver.class);
-        static ZooKeeperClient.Builder mockZkBuilder = mock(ZooKeeperClient.Builder.class);
-        static ZooKeeperClient mockZkc = mock(ZooKeeperClient.class);
-        static LedgerManagerFactory mockFactory = mock(LedgerManagerFactory.class, CALLS_REAL_METHODS);
-        private static Function<MetadataBookieDriver, Void> myvalidfunction1 = driver -> {
-            return (Void) null;
-        };
-        private static Function<MetadataClientDriver, Void> myvalidfunction2 = driver -> {
+        protected MetadataClientDriver clientDriver;
+        protected MetadataBookieDriver bookieDriver;
+        protected ClientConfiguration clientConf;
+        protected ServerConfiguration serverConf;
+        protected ScheduledExecutorService exec;
+        protected ZKMetadataClientDriver ZKcl;
+        protected ZooKeeperClient.Builder mockZkBuilder;
+        protected ZooKeeperClient mockZkc;
+        protected LedgerManagerFactory mockFactory;
+
+
+        private static Function<MetadataClientDriver, Void> myvalidfunction = driver -> {
             return (Void) null;
         };
 
         @Before
         public void configureWithException() throws MetadataException, InterruptedException, KeeperException, ConfigurationException, IOException {
+
+            this.bookieDriver= mock(MetadataBookieDriver.class);
+            this.clientDriver = mock(MetadataClientDriver.class);
+            this.clientConf = mock(ClientConfiguration.class);
+            this.serverConf= mock(ServerConfiguration.class);
+            this.exec = mock(ScheduledExecutorService.class);
+            this.ZKcl=  mock(ZKMetadataClientDriver.class);
+            this.mockZkBuilder =  mock(ZooKeeperClient.Builder.class);
+            this.mockZkc = mock(ZooKeeperClient.class);
+            this.mockFactory= mock(LedgerManagerFactory.class);
+
             when(serverConf.getMetadataServiceUri()).thenReturn("zk+null://127.0.0.1/path/to/ledgers");
             when(clientConf.getMetadataServiceUri()).thenReturn("zk+null://127.0.0.1/path/to/ledgers");
             when(clientDriver.initialize(clientConf, exec, NullStatsLogger.INSTANCE, null)).thenReturn(clientDriver);
@@ -174,7 +197,7 @@ public  class RunFunctionWithMetadataClientDriverTest<T> {
 
         @Test(expected = MetadataException.class)
         public void testConfigurationExceptionClient() throws ExecutionException, MetadataException {
-            MetadataDrivers.runFunctionWithMetadataClientDriver(clientConf, myvalidfunction2, null);
+            MetadataDrivers.runFunctionWithMetadataClientDriver(clientConf, myvalidfunction, null);
         }
     }
 }

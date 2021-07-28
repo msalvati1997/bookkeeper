@@ -1,8 +1,10 @@
 package org.apache.bookkeeper.client;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+
+import java.nio.charset.StandardCharsets;
 import java.util.*;
-import static org.mockito.Mockito.*;
+
 import org.apache.bookkeeper.client.api.DigestType;
 import org.apache.bookkeeper.client.api.LedgerMetadata;
 import org.apache.bookkeeper.net.BookieSocketAddress;
@@ -88,11 +90,11 @@ public class LedgerMetadataTest {
 			return java.util.Arrays.asList(new Object[][]{
 					{MAC, "psw".getBytes(), 0L, 3, 2, 1, 1, 1L, 1L, Collections.emptyMap(), 1L, 0L, true, 0L,true,null},
 					//adequacy
-					{null, null, 0L, 1, 1, 1, 1, 1L, 1L, anyMap(), 1L, 0L, true, 0L,true,null},
-					{MAC, "psw".getBytes(), 0L, 3, 2, 1, 1, 1L, 1L, Collections.emptyMap(), 0L, 0L, true, 0L,false,null},
-					{DUMMY, "".getBytes(), 125L, 1, -1, 1, 1, 1L, 1L, anyMap(), 1L, 0L, false, 0L,true,IllegalArgumentException.class}, //Write quorum must be greater or equal to ack quorum
-					{CRC_32, "".getBytes(), 1L, 1, 2, 2, 1, 1L, 1L, anyMap(), 1L, -1L, false, 0L,true,IllegalArgumentException.class}, //Write quorum must be less or equal to ensemble size
-					{CRC_32_C, "".getBytes(), null, 1, 1, 1, 1, 1L, 1L, anyMap(), 0L, 0L, false, 0L,true,IllegalArgumentException.class} ,//ledger id must be set
+					{null, null, 0L, 1, 1, 1, 1, 1L, 1L, Collections.emptyMap(), 1L, 0L, true, 0L,true,null},
+					{MAC, "psw".getBytes(), 0L, 3, 2, 1, 1, 1L, 1L, generateRandomMap(5), 0L, 0L, true, 0L,false,null},
+					{DUMMY, "".getBytes(), 125L, 1, -1, 1, 1, 1L, 1L, Collections.emptyMap(), 1L, 0L, false, 0L,true,IllegalArgumentException.class}, //Write quorum must be greater or equal to ack quorum
+					{CRC_32, "".getBytes(), 1L, 1, 2, 2, 1, 1L, 1L, Collections.emptyMap(), 1L, -1L, false, 0L,true,IllegalArgumentException.class}, //Write quorum must be less or equal to ensemble size
+					{CRC_32_C, "".getBytes(), null, 1, 1, 1, 1, 1L, 1L, Collections.emptyMap(), 0L, 0L, false, 0L,true,IllegalArgumentException.class} ,//ledger id must be set
 					{CRC_32_C, "".getBytes(), 0L, 1, 1, 1, 1, 1L, 1L, Collections.emptyMap(), null, null, false, 0L,false,IllegalArgumentException.class} ,//There must be at least one ensemble in the ledger
 			});
 		}
@@ -161,72 +163,33 @@ public class LedgerMetadataTest {
 				Assert.assertEquals(e.getClass(),res);
 			}
 		}
-	@Test
-	public void testFromLedgerMetadata() {
-		try {
-			LedgerMetadataBuilder builder = LedgerMetadataBuilder.create();
-			if(digestType!=null) {
-				builder.withDigestType(digestType);
-			}if(closed) {
-				builder.withClosedState();
-				builder.withLength(lenght);
-				if(lastEntryId!=null)
-					builder.withLastEntryId(lastEntryId);
-			}if(ledgerId!=null) {
-				builder.withId(ledgerId);
-			}if(passwd!=null) {
-				builder.withPassword(passwd);
-			}if(ctime!=null) {
-				builder.withCreationTime(ctime);
-			}if(ensembleSize!=null) {
-				builder.withEnsembleSize(ensembleSize);
-				ensemble = new ArrayList<>();
-				for (int i = 0; i < ensembleSize; i++) {
-					ensemble.add(new BookieSocketAddress("192.0.2.1", 1234).toBookieId());
-				}
-			}if(writequorumSize!=null) {
-				builder.withWriteQuorumSize(writequorumSize);
-			}if(ackQuorumSize!=null) {
-				builder.withAckQuorumSize(ackQuorumSize);
-			}if(version!=null) {
-				builder.withMetadataFormatVersion(version);
-			}if(customMetadata!=null) {
-				builder.withCustomMetadata(customMetadata);
-			}if(ctoken!=null) {
-				builder.withCToken(ctoken);
+	}
 
-			}if(storeCtime!=null) {
-				builder.storingCreationTime(storeCtime);
-			}if(firstEntryId!=null) {
-				builder.newEnsembleEntry(firstEntryId,ensemble);
-			}
-			LedgerMetadata other = builder.build();
-			org.apache.bookkeeper.client.api.LedgerMetadata metadata = LedgerMetadataBuilder.from(other).build();
-			assertEquals( (long)ledgerId, metadata.getLedgerId());
-			assertEquals( (long)ensembleSize, metadata.getEnsembleSize());
-			assertEquals( (int) writequorumSize, metadata.getWriteQuorumSize());
-			assertEquals( (int) ackQuorumSize, metadata.getAckQuorumSize());
-			if (passwd != null) {
-				assertEquals(digestType, metadata.getDigestType());
-			}
-			assertEquals( (long) (ctime), metadata.getCtime());
-			if(closed) {
-			assertEquals((long) (lastEntryId), metadata.getLastEntryId());
-			assertEquals((long) (lenght), metadata.getLength());
-			assertTrue(metadata.isClosed()); }
-			assertEquals(1, metadata.getAllEnsembles().size());
-			assertEquals((long)(lenght), metadata.getLength());
-			assertEquals(ensemble, metadata.getAllEnsembles().get(firstEntryId));
-			assertEquals(ensemble, metadata.getEnsembleAt(firstEntryId));
-			assertEquals(customMetadata, metadata.getCustomMetadata());
-			assertEquals((long)(version), metadata.getMetadataFormatVersion());
-		} catch (Exception e) {
-			e.printStackTrace();
-			Assert.assertEquals(e.getClass(),res);
+
+	@RunWith(Parameterized.class)
+	public static class fromOtherTest {
+
+	   private final LedgerMetadata other;
+		public fromOtherTest(LedgerMetadata other) {
+			this.other = other;
 		}
 
+		@Parameterized.Parameters(name = "TestLedgerMetadataTest: {0},{1},{2},{3},{4},{5},{6},{7},{8}")
+		public static Collection data() {
+			return java.util.Arrays.asList(new Object[][]{
+					{LedgerMetadataBuilder.create().withId(1L).withEnsembleSize(1).newEnsembleEntry(1L,Arrays.asList(new BookieSocketAddress("192.0.2.1", 1234).toBookieId())).withWriteQuorumSize(1).withAckQuorumSize(1).build()},
+					//adequacy
+					{LedgerMetadataBuilder.create().withId(1L).withLength(3).withEnsembleSize(1).newEnsembleEntry(1L,Arrays.asList(new BookieSocketAddress("192.0.2.1", 1234).toBookieId())).withWriteQuorumSize(1).withClosedState().withLastEntryId(1).withAckQuorumSize(1).build()},
+					{LedgerMetadataBuilder.create().withId(1L).withLength(3).withEnsembleSize(1).newEnsembleEntry(1L,Arrays.asList(new BookieSocketAddress("192.0.2.1", 1234).toBookieId())).withWriteQuorumSize(1).withClosedState().withLastEntryId(1).withAckQuorumSize(1).withDigestType(DigestType.CRC32).withPassword("".getBytes(StandardCharsets.UTF_8)).build()},
+			});
+		}
+
+		@Test
+		public void testFromLedgerMetadata() {
+			LedgerMetadataBuilder.from(other);
+		}
 	}
-	}
+
 
 	@RunWith(Parameterized.class)
 	public static class newEnsembleEntryTest {
@@ -376,6 +339,14 @@ public class LedgerMetadataTest {
 				}
 			}
 		}
+	private static Map<String,byte[]> generateRandomMap(int size) {
+		Map<String,byte[]> map = new HashMap<String,byte[]>();
+		for(int i=0;i<size;i++) {
+			String key = "key"+i;
+			map.put(key,key.getBytes());
+		}
+		return map;
+	}
 	}
 
 
